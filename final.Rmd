@@ -9,22 +9,64 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+## Abstract
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+## Introduction
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+## Results
 
-```{r cars}
-summary(cars)
+blah blah balh validation of input and summary
+
+First, we load all necessary packages for this analysis.
+
+```{r, warning = FALSE, echo = FALSE}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
 ```
 
-## Including Plots
+Then we load all of the data into memory.
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+measurement_summary <- data.table::fread("input/AirPollutionSeoul/Measurement_summary.csv")
+measurement_info <- data.table::fread("input/AirPollutionSeoul/Original Data/Measurement_info.csv")
+measurement_item_info <- data.table::fread("input/AirPollutionSeoul/Original Data/Measurement_item_info.csv")
+measurement_station_info <- data.table::fread("input/AirPollutionSeoul/Original Data/Measurement_station_info.csv")
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Then we do a quick examination of all of the datasets.
+
+```{r}
+dim(measurement_summary)
+summary(measurement_summary)
+plot(measurement_summary %>% select(-c(`Measurement date`, Address)))
+```
+
+```{r}
+dim(measurement_info)
+summary(measurement_info)
+plot(measurement_summary %>% select(-c(`Measurement date`))
+```
+
+
+```{r}
+dim(measurement_item_info)
+summary(measurement_item_info)
+plot(measurement_item_info %>% select(-c(`Ite`, Address)))
+```
+
+
+```{r}
+dim(measurement_station_info)
+summary(measurement_station_info)
+```
+
+
+## Discussion
+
+## Acknowledgements
+I would like to acknowledge Prof. Parzen and the teaching assitants of Stat 109 for teaching the course. Additionally, I would like to acknowledge bappe, Kaggle, and the Korean government for releasing this dataset.
+
+
+## References
+probably whatever package i need
