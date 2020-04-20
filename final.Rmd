@@ -38,7 +38,7 @@ measurement_station_info <- data.table::fread("input/AirPollutionSeoul/Original 
 
 ```{r create_explanation_df, echo = FALSE}
 measurement_summary_explaination <- data.frame(Variables = c("Measurement Date", "Station code", "Address", "Latitude", "Longitude", "SO2", "NO2", "O3", "CO", "PM10", "PM2.5"), 
-                                               Explaination = c("Date of Measurement", "Station code", "Address of monitoring station", "Latitude of station", "Longitude of station", "Average Sulfur Dioxide(ppm)", "Average NO2(ppm)", "Average O3(ppm)", "Average CO(ppm)", "Average PM10(µg/m^3)", "Average PM2.5(µg/m^3 )"))
+                                               Explaination = c("Date of Measurement", "Station code", "Address of monitoring station", "Latitude of station", "Longitude of station", "Average Sulfur Dioxide(ppm)", "Average Nitrogen Dioxide(ppm)", "Average Ozone(ppm)", "Average Carbon Monoxide(ppm)", "Average Particulate Matter 10µg or less (µg/m^3)", "Average Particulate Matter 2.5µg or less(µg/m^3 )"))
 
 measurement_info_explanation <- data.frame(Variables = c("Measurement Date", "Station Code", "Item Code", "Average Value", "Instrument Status"), 
                                            Explanation = c("Measurement Date", "Station Code Primary key", "Item Code Primary Key", "Average value for given item code", "Status of instrument"))
@@ -51,6 +51,8 @@ measurement_station_info_explaination <- data.frame(Variables = c("Station code"
 ```
 
 ### Dataset Summary
+
+There are four datasets in this analysis. One is the summary and the others are elements used to help build the summary. The variable keys for the datasets can be seen below.   
 
 #### Variable Keys
 ##### Measurement Summary
