@@ -23,6 +23,7 @@ First, we load all necessary packages for this analysis.
 library(dplyr)
 library(ggplot2)
 library(tidyr)
+library(lubridate)
 library(knitr)
 library(kableExtra)
 ```
@@ -76,7 +77,22 @@ kable(measurement_item_info_explaination) %>% kable_styling()
 kable(measurement_station_info_explaination) %>% kable_styling()
 ```
 
+### Exploratory Analysis
 
+```{r, echo = FALSE}
+# Fixing variable types
+measurement_summary <- measurement_summary %>% mutate(`Measurement date` = as.POSIXct(`Measurement date`, tz = "GMT"), `Station code` = as.factor(`Station code`), Address = as.factor(Address) )
+```
+
+```{r}
+str(measurement_summary)
+summary(measurement_summary)
+```
+
+look into range of measurement dates
+look into number of measuring stations
+get map of lat long of measurement stations 
+maybe do histogram of station to all values if not too many to group by agg mean
 
 ## Discussion
 
