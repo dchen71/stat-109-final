@@ -49,24 +49,24 @@ measurement_station_info_explaination <- data.frame(Variables = c("Station code"
 
 #### Variable Key
 ##### Measurement Summary
-```{r}
-kable(measurement_summary_explaination)
+```{r, echo = FALSE}
+kable(measurement_summary_explaination) %>% kable_styling()
 ```
 
 #### Measurement Info
-```{r}
-kable(measurement_info_explanation)
+```{r, echo = FALSE}
+kable(measurement_info_explanation) %>% kable_styling()
 ```
 
 
 #### Measurement Item Info
-```{r}
-kable(measurement_item_info_explaination)
+```{r, echo = FALSE}
+kable(measurement_item_info_explaination) %>% kable_styling()
 ```
 
 #### Measurement Station Info
-```{r}
-kable(measurement_station_info_explaination)
+```{r, echo = FALSE}
+kable(measurement_station_info_explaination) %>% kable_styling()
 ```
 
 
