@@ -41,7 +41,7 @@ Then we do a quick examination of all of the datasets.
 ```{r}
 measurement_summary_explaination <- data.frame(Variables = c("Measurement Date", "Station code", "Address", "Latitude", "Longitude", "SO2", "NO2", "O3", "CO", "PM10", "PM2.5"), Explaination = c("Date of Measurement", "Station code", "Address of monitoring station", "Latitude of station", "Longitude of station", "Average Sulfur Dioxide(ppm)", "Average NO2(ppm)", "Average O3(ppm)", "Average CO(ppm)", "Average PM10(µg/m^3)", "Average PM2.5(µg/m^3 )"))
 measurement_info_explanation <- data.frame(Variables = c("Measurement Date", "Station Code", "Item Code", "Average Value", "Instrument Status"), Explanation = c("Measurement Date", "Station Code Primary key", "Item Code Primary Key", "Average value for given item code", "Status of instrument"))
-measurement_item_info_explaination <- data.frame(Variables = c("Item code", "Item name", "Unit of measurement", "Good(blue)", "Normal(green)", "Bad(yellow)", "Very bad(Red)", explaination = c("Measurement Date", "Measured item name", "Unit of measurement", "Good value", "Normal value", "Bad value", "Very bad value")))
+measurement_item_info_explaination <- data.frame(Variables = c("Item code", "Item name", "Unit of measurement", "Good(blue)", "Normal(green)", "Bad(yellow)", "Very bad(Red)"), Explaination = c("Measurement Date", "Measured item name", "Unit of measurement", "Good value", "Normal value", "Bad value", "Very bad value"))
 measurement_station_info_explaination <- data.frame(Variables = c("Station code", "Station name(district)", "Address", "Latitude", "Longitude"), Explaination = c("Station code primary key", "District name for station", "Address of station", "Latitude", "Longitude"))
 ```
 
