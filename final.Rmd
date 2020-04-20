@@ -44,7 +44,7 @@ measurement_info_explanation <- data.frame(Variables = c("Measurement Date", "St
                                            Explanation = c("Measurement Date", "Station Code Primary key", "Item Code Primary Key", "Average value for given item code", "Status of instrument"))
 
 measurement_item_info_explaination <- data.frame(Variables = c("Item code", "Item name", "Unit of measurement", "Good(blue)", "Normal(green)", "Bad(yellow)", "Very bad(Red)"), 
-                                                 Explaination = c("Measurement Date", "Measured item name", "Unit of measurement", "Good value", "Normal value", "Bad value", "Very bad value"))
+                                                 Explaination = c("Item code primary key", "Measured item name", "Unit of measurement", "Good value", "Normal value", "Bad value", "Very bad value"))
 
 measurement_station_info_explaination <- data.frame(Variables = c("Station code", "Station name(district)", "Address", "Latitude", "Longitude"), 
                                                     Explaination = c("Station code primary key", "District name for station", "Address of station", "Latitude", "Longitude"))
