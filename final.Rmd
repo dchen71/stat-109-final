@@ -85,12 +85,25 @@ measurement_summary <- measurement_summary %>% mutate(`Measurement date` = as.PO
 ```
 
 ```{r}
-str(measurement_summary)
 summary(measurement_summary)
 ```
 
-look into range of measurement dates
-look into number of measuring stations
+```{r}
+paste(min(measurement_summary$`Measurement date`), "-", max(measurement_summary$`Measurement date`))
+```
+This data ranges from the start of 2017 to the end of 2019 or about 3 years worth of monitoring data.
+
+```{r}
+unique(measurement_summary$`Station code`) %>% length
+```
+
+There are 25 monitoring stations.
+
+```{r}
+
+```
+
+
 get map of lat long of measurement stations 
 maybe do histogram of station to all values if not too many to group by agg mean
 
