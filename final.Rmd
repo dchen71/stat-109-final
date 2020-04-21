@@ -113,14 +113,14 @@ ggplot() +
 The figure above is a plot of Seoul with the lines representing the divisions between different municipalities. The red diamonds show the location of the `r unique(measurement_summary$`Station code`) %>% length` monitoring stations in this study. 
 
 ```{r, echo = FALSE}
-measurement_summary_long <- gather(measurement_summary, Measurement, Average, SO2:PM2.5)
-ggplot(measurement_summary_long %>% filter(Measurement %in% c("PM10", "PM2.5")), aes(x = `Measurement date`, y = Average, color = Measurement)) + geom_line() + ggtitle("Average Particulate Matter Measurements over time")
+measurement_summary_long <- gather(measurement_summary, Measurement, Value, SO2:PM2.5) %>% group_by(`Measurement date`, Measurement) %>% summarise(Average = mean(Value))
+ggplot(measurement_summary_long %>% filter(Measurement %in% c("PM10", "PM2.5")), aes(x = `Measurement date`, y = Average, color = Measurement)) + geom_line() + ggtitle("Average Particulate Matter(ug/m^3) Measurements over time") + ylab("Average(ug/m^3)")
 ```
 
-The above line plot shows the average values over time for all of the different measurements. 
+The plot above shows the average particulate matter value over the course of about three years. In general, it looks like PM10 has higher measured values.
 
 ```{r, echo = FALSE}
-ggplot(measurement_summary_long %>% filter(Measurement %in% c("SO2", "NO2", "O3", "CO")), aes(x = `Measurement date`, y = Average, color = Measurement)) + geom_line() + ggtitle("Average Chemical Compound Measurements over time")
+ggplot(measurement_summary_long %>% filter(Measurement %in% c("SO2", "NO2", "O3", "CO")), aes(x = `Measurement date`, y = Average, color = Measurement)) + geom_line() + ggtitle("Average Chemical Compound(ppm) Measurements over time") + ylab("Average(ppm)")
 ```
 
 
