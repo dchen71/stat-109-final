@@ -112,7 +112,18 @@ ggplot() +
 
 The figure above is a plot of Seoul with the lines representing the divisions between different municipalities. The red diamonds show the location of the `r unique(measurement_summary$`Station code`) %>% length` monitoring stations in this study. 
 
-get map of lat long of measurement stations 
+```{r, echo = FALSE}
+measurement_summary_long <- gather(measurement_summary, Measurement, Average, SO2:PM2.5)
+ggplot(measurement_summary_long %>% filter(Measurement %in% c("PM10", "PM2.5")), aes(x = `Measurement date`, y = Average, color = Measurement)) + geom_line() + ggtitle("Average Particulate Matter Measurements over time")
+```
+
+The above line plot shows the average values over time for all of the different measurements. 
+
+```{r, echo = FALSE}
+ggplot(measurement_summary_long %>% filter(Measurement %in% c("SO2", "NO2", "O3", "CO")), aes(x = `Measurement date`, y = Average, color = Measurement)) + geom_line() + ggtitle("Average Chemical Compound Measurements over time")
+```
+
+
 maybe do histogram of station to all values if not too many to group by agg mean
 
 ## Discussion
