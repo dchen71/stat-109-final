@@ -26,6 +26,7 @@ library(tidyr)
 library(lubridate)
 library(knitr)
 library(kableExtra)
+library(geojsonio)
 ```
 
 
@@ -93,16 +94,23 @@ paste(min(measurement_summary$`Measurement date`), "-", max(measurement_summary$
 ```
 This data ranges from the start of 2017 to the end of 2019 or about 3 years worth of monitoring data.
 
-```{r}
-unique(measurement_summary$`Station code`) %>% length
+
+```{r maps, echo = FALSE, warnings = FALSE, message = FALSE}
+# Load data
+spdf1 <- geojson_read("input/seoul_municipalities_geo_simple.json",  what = "sp")
+spdf2 <- geojson_read("input/seoul_submunicipalities_geo_simple.json",  what = "sp")
+
+# Prep ggplot for plotting
+library(broom)
+spdf_fortified <- tidy(spdf1)
+ggplot() +
+  geom_polygon(data = spdf_fortified, aes( x = long, y = lat, group = group), fill="#69b3a2", color="white") +
+  geom_point(data = measurement_station_info, aes(x = Longitude, y = Latitude), size = 4, shape = 23, fill = "darkred") +
+  theme_void() +
+  coord_map()
 ```
 
-There are 25 monitoring stations.
-
-```{r}
-
-```
-
+The figure above is a plot of Seoul with the lines representing the divisions between different municipalities. The red diamonds show the location of the `r unique(measurement_summary$`Station code`) %>% length` monitoring stations in this study. 
 
 get map of lat long of measurement stations 
 maybe do histogram of station to all values if not too many to group by agg mean
