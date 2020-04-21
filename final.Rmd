@@ -78,22 +78,18 @@ kable(measurement_item_info_explaination) %>% kable_styling()
 kable(measurement_station_info_explaination) %>% kable_styling()
 ```
 
-### Exploratory Analysis
+### Exploratory Data Analysis
 
 ```{r, echo = FALSE}
 # Fixing variable types
 measurement_summary <- measurement_summary %>% mutate(`Measurement date` = as.POSIXct(`Measurement date`, tz = "GMT"), `Station code` = as.factor(`Station code`), Address = as.factor(Address) )
 ```
 
-```{r}
+```{r, echo = FALSE}
 summary(measurement_summary)
 ```
 
-```{r}
-paste(min(measurement_summary$`Measurement date`), "-", max(measurement_summary$`Measurement date`))
-```
-This data ranges from the start of 2017 to the end of 2019 or about 3 years worth of monitoring data.
-
+We take a quick loko at the data to understand how the summary is laid out. The data looks like a wide data format of various measurement values across 3 years from multiple locations.
 
 ```{r maps, echo = FALSE, warnings = FALSE, message = FALSE}
 # Load data
@@ -110,7 +106,7 @@ ggplot() +
   coord_map()
 ```
 
-The figure above is a plot of Seoul with the lines representing the divisions between different municipalities. The red diamonds show the location of the `r unique(measurement_summary$`Station code`) %>% length` monitoring stations in this study. 
+The figure above is a plot of Seoul with the lines representing the divisions between different municipalities. The red diamonds show the location of the `r levels(measurement_summary[,2]) %>% length` monitoring stations in this study. 
 
 ```{r, echo = FALSE}
 measurement_summary_long <- gather(measurement_summary, Measurement, Value, SO2:PM2.5) %>% group_by(`Measurement date`, Measurement) %>% summarise(Average = mean(Value))
@@ -123,8 +119,7 @@ The plot above shows the average particulate matter value over the course of abo
 ggplot(measurement_summary_long %>% filter(Measurement %in% c("SO2", "NO2", "O3", "CO")), aes(x = `Measurement date`, y = Average, color = Measurement)) + geom_line() + ggtitle("Average Chemical Compound(ppm) Measurements over time") + ylab("Average(ppm)")
 ```
 
-
-maybe do histogram of station to all values if not too many to group by agg mean
+We can see in this plot above that the highest measured values out of the chemicals is Carbon monoxide. The other measurements are smaller and deviations can be seen including what appear to be measurement errors as they are below 0. There seemed to have been some sort of sensor malfunction around Fall of 2019 and some major spikes especially in 2019. 
 
 ## Discussion
 
