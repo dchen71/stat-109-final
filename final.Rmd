@@ -112,11 +112,10 @@ The figure above is a plot of Seoul with the lines representing the divisions be
 
 ```{r, echo = FALSE}
 # Using average across all stations to save compute
-measurement_summary_long <- gather(measurement_summary, Measurement, Value, SO2:PM2.5) %>% group_by(`Measurement 
+measurement_summary_long <- gather(measurement_summary, Measurement, Value, SO2:PM2.5) %>% group_by(`Measurement date`, Measurement) %>% summarise(Average = mean(Value))
 ```
 
 ```{r, echo = FALSE}
-date`, Measurement) %>% summarise(Average = mean(Value))
 ggplot(measurement_summary_long %>% filter(Measurement %in% c("PM10", "PM2.5")), aes(x = `Measurement date`, y = Average, color = Measurement)) + geom_line() + ggtitle("Average Particulate Matter(ug/m^3) Measurements over time") + ylab("Average(ug/m^3)")
 ```
 
