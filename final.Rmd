@@ -27,6 +27,7 @@ library(lubridate)
 library(knitr)
 library(kableExtra)
 library(geojsonio)
+library(gridExtra)
 ```
 
 
@@ -120,6 +121,14 @@ ggplot(measurement_summary_long %>% filter(Measurement %in% c("SO2", "NO2", "O3"
 ```
 
 We can see in this plot above that the highest measured values out of the chemicals is Carbon monoxide. The other measurements are smaller and deviations can be seen including what appear to be measurement errors as they are below 0. There seemed to have been some sort of sensor malfunction around Fall of 2019 and some major spikes especially in 2019. 
+
+```{r, echo = FALSE}
+p1_2019 <- ggplot(measurement_summary_long %>% filter(Measurement %in% c("SO2", "NO2", "O3", "CO")) %>% filter(`Measurement date` > ymd(20190101)), aes(x = `Measurement date`, y = Average, color = Measurement)) + geom_line() + ggtitle("Average Chemical Compound(ppm) Measurements in 2019") + ylab("Average(ppm)")
+p2_2019 <- ggplot(measurement_summary_long %>% filter(Measurement %in% c("PM10", "PM2.5")) %>% filter(`Measurement date` > ymd(20190101)), aes(x = `Measurement date`, y = Average, color = Measurement)) + geom_line() + ggtitle("Average Particulate Matter(ug/m^3) Measurements in 2019") + ylab("Average(ug/m^3)")
+grid.arrange(p1_2019, p2_2019, nrow = 2)
+```
+
+We try to examine 2019 a bit more closer. There was a cyclical event at around early March which caused a spike in polution levels in both the chemical level and particle level. The pollution levels look somewhat seasonal as it looks like CO levels are higher during the mid fall to early spring. 
 
 ## Discussion
 
