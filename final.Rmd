@@ -28,6 +28,7 @@ library(knitr)
 library(kableExtra)
 library(geojsonio)
 library(gridExtra)
+library(forecast)
 ```
 
 
@@ -110,7 +111,12 @@ ggplot() +
 The figure above is a plot of Seoul with the lines representing the divisions between different municipalities. The red diamonds show the location of the `r levels(measurement_summary[,2]) %>% length` monitoring stations in this study. 
 
 ```{r, echo = FALSE}
-measurement_summary_long <- gather(measurement_summary, Measurement, Value, SO2:PM2.5) %>% group_by(`Measurement date`, Measurement) %>% summarise(Average = mean(Value))
+# Using average across all stations to save compute
+measurement_summary_long <- gather(measurement_summary, Measurement, Value, SO2:PM2.5) %>% group_by(`Measurement 
+```
+
+```{r, echo = FALSE}
+date`, Measurement) %>% summarise(Average = mean(Value))
 ggplot(measurement_summary_long %>% filter(Measurement %in% c("PM10", "PM2.5")), aes(x = `Measurement date`, y = Average, color = Measurement)) + geom_line() + ggtitle("Average Particulate Matter(ug/m^3) Measurements over time") + ylab("Average(ug/m^3)")
 ```
 
@@ -129,6 +135,18 @@ grid.arrange(p1_2019, p2_2019, nrow = 2)
 ```
 
 We try to examine 2019 a bit more closer. There was a cyclical event at around early March which caused a spike in polution levels in both the chemical level and particle level. The pollution levels look somewhat seasonal as it looks like CO levels are higher during the mid fall to early spring. 
+
+```{r}
+measurement_summary_wide <- spread(measurement_summary_long, Measurement, Average)
+pairs(measurement_summary_wide %>% select(-`Measurement date`))
+```
+
+We look at the pairwise plot fo the average measurements. It looks like in general that everything is positively correlated although some pairwise correlations do look more nonlinear in nature like  with CO and NO2.. 
+
+```{r}
+measurement_summary_ts <- ts(measurement_summary_wide, start = 2017, end = 2020, frequency = 1)
+```
+
 
 ## Discussion
 
