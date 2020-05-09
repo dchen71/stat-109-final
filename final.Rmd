@@ -10,12 +10,15 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Abstract
+siomething about seoul and pollution and hypothesis
+
+
 
 ## Introduction
+something about seoul pollution, hypothesis and models and forecasting
+
 
 ## Results
-
-blah blah balh validation of input and summary
 
 First, we load all necessary packages for this analysis.
 
@@ -34,7 +37,7 @@ library(vars)
 ```
 
 
-```{r load_data, echo = FALSE}
+```{r load_data, echo = FALSE, warning = FALSE}
 # Load data
 measurement_summary <- data.table::fread("input/AirPollutionSeoul/Measurement_summary.csv")
 measurement_info <- data.table::fread("input/AirPollutionSeoul/Original Data/Measurement_info.csv")
@@ -93,7 +96,7 @@ measurement_summary <- measurement_summary %>% mutate(`Measurement date` = as.PO
 summary(measurement_summary)
 ```
 
-We take a quick loko at the data to understand how the summary is laid out. The data looks like a wide data format of various measurement values across 3 years from multiple locations.
+We take a quick look at the data to understand how the summary is laid out. The data looks like a wide data format of various measurement values across 3 years from multiple in Korea. The data ranges from 2017 to the end of 2019.  
 
 ```{r maps, echo = FALSE, warnings = FALSE, message = FALSE}
 # Load data
@@ -127,7 +130,7 @@ The plot above shows the average particulate matter value over the course of abo
 ggplot(measurement_summary_long %>% filter(Measurement %in% c("SO2", "NO2", "O3", "CO")), aes(x = `Measurement date`, y = Average, color = Measurement)) + geom_line() + ggtitle("Average Chemical Compound(ppm) Measurements over time") + ylab("Average(ppm)")
 ```
 
-We can see in this plot above that the highest measured values out of the chemicals is Carbon monoxide. The other measurements are smaller and deviations can be seen including what appear to be measurement errors as they are below 0. There seemed to have been some sort of sensor malfunction around Fall of 2019 and some major spikes especially in 2019. 
+We can see in this plot above that the highest measured values out of the chemicals is Carbon Monoxide. The other measurements have lower average ppm and deviations can be seen including what appear to be measurement errors as they are below 0. There seemed to have been some sort of sensor malfunction around Fall of 2019 and some major spikes especially in 2019. 
 
 ```{r, echo = FALSE}
 p1_2019 <- ggplot(measurement_summary_long %>% filter(Measurement %in% c("SO2", "NO2", "O3", "CO")) %>% filter(`Measurement date` > ymd(20190101)), aes(x = `Measurement date`, y = Average, color = Measurement)) + geom_line() + ggtitle("Average Chemical Compound(ppm) Measurements in 2019") + ylab("Average(ppm)")
@@ -139,7 +142,7 @@ We try to examine 2019 a bit more closer. There was a cyclical event at around e
 
 ```{r}
 measurement_summary_wide <- spread(measurement_summary_long, Measurement, Average)
-pairs(measurement_summary_wide %>% select(-`Measurement date`))
+pairs(measurement_summary_wide %>% dplyr::select(-`Measurement date`))
 ```
 
 We look at the pairwise plot fo the average measurements. It looks like in general that everything is positively correlated although some pairwise correlations do look more nonlinear in nature like with CO and NO2. We would like to double check now that this dataset is not stationary. What that means is that we are interested in finding out whether or not the data follows seasonal or cyclical trends. We are checking a lag time of 24 or 24 hours in this case. The data is tested using a Ljung-Box Q Test which checks to see if the time series has a non zero autocorrelation at each lag point.  
@@ -152,25 +155,50 @@ for(i in c("CO", "NO2", "O3", "PM10", "PM2.5", "SO2")){
 
 All of the measurement columns under a lag period of 24 hours is significant so all of the data columns do show some level of seasonaliity and cyclical behaviors. 
 
-Now that we understand the data, we would like to see what the predicted values for all pollution metrics in Spring under the assumption that COVID-19 had not impacted anything. We first convert the data into a time series by months to better capture large scale changes.   
+Now that we understand the data, we would like to see what the forecasted values for all pollution metrics in the 10 months after the end of 2019. We first convert the data into a time series object rolling by months to better capture large scale changes.   
 
 ```{r}
-# Monthly 
-measurement_summary_ts <- ts(measurement_summary_wide, start = c(2017, 1, 1), end = c(2019, 12, 31), frequency = 12)
+# Quarterly
+measurement_summary_ts <- ts(measurement_summary_wide %>% ungroup %>% dplyr::select(-`Measurement date`), start = c(2017, 1, 1), end = c(2019, 12, 31), frequency = 12)
 ```
 
+We then run the Vector Autoregression model with a lag of 1 month.  
 
-something about vector auto regression model including equation and how similar it is to multi variate linear modeling - the timepointing
-check if data is stationary
-then do a auto regression model or nonlinear version
-predict plot
+```{r}
+# Get the estimated coefficients
+VAR_est <- VAR(measurement_summary_ts, p = 1, type = "none")
+summary(VAR_est)
+```
 
+We get back a variety of linear models for each each predictor. We use a lag of 1 to get the difference between seasons and see some terms are significant in various predictors. For instance, PM10 has some relationship with PM2.5 which is expected. Although some of the models have good adjusted r^2, others like SO2 have very poor performance. Now, we plot the forecasted pollution values up to 10 months away from the end of 2019.  
+
+```{r}
+plot(predict(VAR_est))
+```
+
+In the series of forecasted plots, we can see the predicted trend in blue and the 95% confidence interval in red. We can see two trends from the forecasts. PM10 and PM2.5 both are gradually increasing in each quarter since 2016 and is expected to increase again in the future. Most of the other chemicals measured will increase again in the future. For instance, NO2, O3, and SO2. The sensor seeming to malfunction can be seen in the sharp drop in the NO2 and O3 and SO3 forecast plots. We can also try quarterly to see if there are any differences.  
+
+```{r}
+measurement_summary_quarter_ts <- ts(measurement_summary_wide %>% ungroup %>% dplyr::select(-`Measurement date`), start = c(2017, 1, 1), end = c(2019, 12, 31), frequency = 4)
+VAR_est <- VAR(measurement_summary_quarter_ts, p = 1, type = "none")
+plot(predict(VAR_est))
+```
+
+We can see changes when we switch to quarterly. PM10 and PM2.5 both continue to increase each quarter. CO, O3, and SO2 both seem to increase cyclically and is forecasted to continue to do so. NO2 interestingly decreases and then increases. 
 
 ## Discussion
 
+
+
 ## Limitations
 
+This analysis is limited only to forcasting trends in pollution metrics that were collected. This has nothing to do with causal relationships and is simply forecasting future pollution levels given prior changes. There is also potentially location based biases which would be better to explore as Seoul is separated by the Han river and the districts can highly vary from high rises to smaller older homes. Furthermore, the analysis can change completely depending on how the time series is sliced. Finally, this forecast is based on prior results. So when black swan events like pandemics happen, forecasts will be completely wrong. 
+
+
 ## Conclusion
+
+Time series measurement 
+
 
 
 ## Acknowledgements
@@ -178,4 +206,5 @@ I would like to acknowledge Prof. Parzen and the teaching assitants of Stat 109 
 
 
 ## References
-probably whatever package i need
+16.1 Vector Autoregressions. https://www.econometrics-with-r.org/16-1-vector-autoregressions.html, May 2020
+An Introduction to Vector Autoregression (VAR). https://www.r-econometrics.com/timeseries/varintro/, May 2020
