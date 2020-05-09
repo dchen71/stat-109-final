@@ -30,6 +30,7 @@ library(geojsonio)
 library(gridExtra)
 library(forecast)
 library(zoo)
+library(vars)
 ```
 
 
@@ -141,12 +142,15 @@ measurement_summary_wide <- spread(measurement_summary_long, Measurement, Averag
 pairs(measurement_summary_wide %>% select(-`Measurement date`))
 ```
 
-We look at the pairwise plot fo the average measurements. It looks like in general that everything is positively correlated although some pairwise correlations do look more nonlinear in nature like with CO and NO2. We would like to double check now that this dataset is not stationary. What that means is that we are interested in finding out whether or not the data follows seasonal or cyclical trends.  
+We look at the pairwise plot fo the average measurements. It looks like in general that everything is positively correlated although some pairwise correlations do look more nonlinear in nature like with CO and NO2. We would like to double check now that this dataset is not stationary. What that means is that we are interested in finding out whether or not the data follows seasonal or cyclical trends. We are checking a lag time of 24 or 24 hours in this case. The data is tested using a Ljung-Box Q Test which checks to see if the time series has a non zero autocorrelation at each lag point.  
 
 ```{r}
-
+for(i in c("CO", "NO2", "O3", "PM10", "PM2.5", "SO2")){
+  print(Box.test(measurement_summary_wide[i] %>% pull, lag=24, type="Ljung-Box"))
+}
 ```
 
+All of the measurement columns under a lag period of 24 hours is significant so all of the data columns do show some level of seasonaliity and cyclical behaviors. 
 
 Now that we understand the data, we would like to see what the predicted values for all pollution metrics in Spring under the assumption that COVID-19 had not impacted anything. We first convert the data into a time series by months to better capture large scale changes.   
 
@@ -154,7 +158,6 @@ Now that we understand the data, we would like to see what the predicted values 
 # Monthly 
 measurement_summary_ts <- ts(measurement_summary_wide, start = c(2017, 1, 1), end = c(2019, 12, 31), frequency = 12)
 ```
- basically bwant to setup the time series object to do stuff with hourly or maybe dailies
 
 
 something about vector auto regression model including equation and how similar it is to multi variate linear modeling - the timepointing
