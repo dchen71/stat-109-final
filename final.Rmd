@@ -29,6 +29,7 @@ library(kableExtra)
 library(geojsonio)
 library(gridExtra)
 library(forecast)
+library(zoo)
 ```
 
 
@@ -119,7 +120,7 @@ measurement_summary_long <- gather(measurement_summary, Measurement, Value, SO2:
 ggplot(measurement_summary_long %>% filter(Measurement %in% c("PM10", "PM2.5")), aes(x = `Measurement date`, y = Average, color = Measurement)) + geom_line() + ggtitle("Average Particulate Matter(ug/m^3) Measurements over time") + ylab("Average(ug/m^3)")
 ```
 
-The plot above shows the average particulate matter value over the course of about three years. In general, it looks like PM10 has higher measured values.
+The plot above shows the average particulate matter value over the course of about three years. In general, it looks like PM10 has higher measured values which would make sense as these are larger particles which would be correlated with PM2.5 as it includes those measurements. .
 
 ```{r, echo = FALSE}
 ggplot(measurement_summary_long %>% filter(Measurement %in% c("SO2", "NO2", "O3", "CO")), aes(x = `Measurement date`, y = Average, color = Measurement)) + geom_line() + ggtitle("Average Chemical Compound(ppm) Measurements over time") + ylab("Average(ppm)")
@@ -140,14 +141,34 @@ measurement_summary_wide <- spread(measurement_summary_long, Measurement, Averag
 pairs(measurement_summary_wide %>% select(-`Measurement date`))
 ```
 
-We look at the pairwise plot fo the average measurements. It looks like in general that everything is positively correlated although some pairwise correlations do look more nonlinear in nature like  with CO and NO2.. 
+We look at the pairwise plot fo the average measurements. It looks like in general that everything is positively correlated although some pairwise correlations do look more nonlinear in nature like with CO and NO2. We would like to double check now that this dataset is not stationary. What that means is that we are interested in finding out whether or not the data follows seasonal or cyclical trends.  
 
 ```{r}
-measurement_summary_ts <- ts(measurement_summary_wide, start = 2017, end = 2020, frequency = 1)
+
 ```
 
 
+Now that we understand the data, we would like to see what the predicted values for all pollution metrics in Spring under the assumption that COVID-19 had not impacted anything. We first convert the data into a time series by months to better capture large scale changes.   
+
+```{r}
+# Monthly 
+measurement_summary_ts <- ts(measurement_summary_wide, start = c(2017, 1, 1), end = c(2019, 12, 31), frequency = 12)
+```
+ basically bwant to setup the time series object to do stuff with hourly or maybe dailies
+
+
+something about vector auto regression model including equation and how similar it is to multi variate linear modeling - the timepointing
+check if data is stationary
+then do a auto regression model or nonlinear version
+predict plot
+
+
 ## Discussion
+
+## Limitations
+
+## Conclusion
+
 
 ## Acknowledgements
 I would like to acknowledge Prof. Parzen and the teaching assitants of Stat 109 for teaching the course. Additionally, I would like to acknowledge bappe, Kaggle, and the Korean government for releasing this dataset.
