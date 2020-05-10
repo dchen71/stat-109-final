@@ -10,13 +10,28 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Abstract
-siomething about seoul and pollution and hypothesis
 
+Air pollution is a growing problem in many countries. Many countries, especially in fast growing countries in Asia, have increasing air pollution problems due to the increasing urbanization and modernization of their societies. South Korea, for example, has one of the largest GDP in Eastern Asia and has have issues due to air quality in the region due to various factors. The Seoul Metroplitical Government in South Korea has several measurement stations to collect pollution data to help with their management of air quality. Using data collected over 24 hours for 3 years, we have granularity into the pollution patterns in Seoul. We are interested in building a forecasting model which might be able to predict pollution levels of various chemicals which could potentally be used to help with air pollution policies.  
 
 
 ## Introduction
-something about seoul pollution, hypothesis and models and forecasting
 
+One of the major causes of death in the world is due to air pollution. Air pollution comes from many sources as a mixture of solid particles and chemicals coming from source such as dust or car exhaust. These particles and chemicals can do long term damage to those that inhale them. Countries run ambient air quality monitoring in order to understand the extent of the pollution and to provide input into emission control strategies. Asia for example, has massive issues with air quality due to the population numbers and rapid industrialization. Seoul in South Korea for example, has some of the worst air quality in the region potentially due to many factors including geographical proximity to some countries and older coal power plants. As approximately 4.2 million people a year die due to these outdoor air pollution, understanding the trends of air pollution can be powerful in reducing pollution and lowering comorbidities due to pollution.  
+
+The data from these monitoring stations are time dependent measurements of various particles and chemicals. Carbon Monoxide(CO) typically comes from sources such as exhaust and can cause a variety of symptoms including headaches. Sulfur Dioxide(SO2) is gaseous and is generally formed from energy generation and is an irritant to the lungs. Nitrogen Dioxide(NO2) is also gaseous and comes from the burning of fuels such as from cars. This chemical is an irritant to the lungs and can potentially cause acid rain. Ozone(O3) is typically atmospeheric but can be generated on the ground through chemical plants and gasoline pumps. Prolonged exposure can cause skin cancer and many respiratory problems. Particulate matter 10 micrometer(PM10) or less and particulate matter 2.5 micrometer or less(PM2.5) are small particles which may be absorbed and cause various issues including fungal infection and cancer. These are all potententially harmful ambient air quality issues and need to be monitored.  
+
+Time series modeling is similar to traditional ordinary least squares linear modeling however, with differences stemming from the introduction of time. Time series data can move seasonally and in cycles. The data must show some pattern like with regular data otherwise the time series without a pattern will just be white noise. Vector autoregression(VAR) are a unique time series based model used to capture the linear interdependencies between predictors among multiple time series. The model is built upon the univariate autoregressive model in which it fits a linear model against two different time points of the same variable. The equation for the model is the following:
+
+$y_t$ = $$\sum_{i=1}^{\infty} a_i * y_{t-i}  + e_t $$  
+
+$y_t$ = Current value of variable
+$a_i$ = Parameter coefficient
+$y_{t-i}$ = Value at lagged time period
+$e_t$ = Error term
+
+As these collected measurements should be correlated to each other, any time series model built upon this data should be built in the assumption that all of the variables interact with each other in some way is why the VAR model was used. 
+
+As air pollution is a massive global problem, building a forecasting model would be helpful in an advanced warning system and being able to better model public policy changes to pollution. 
 
 ## Results
 
@@ -34,6 +49,7 @@ library(gridExtra)
 library(forecast)
 library(zoo)
 library(vars)
+library(corrplot)
 ```
 
 
@@ -145,7 +161,25 @@ measurement_summary_wide <- spread(measurement_summary_long, Measurement, Averag
 pairs(measurement_summary_wide %>% dplyr::select(-`Measurement date`))
 ```
 
-We look at the pairwise plot fo the average measurements. It looks like in general that everything is positively correlated although some pairwise correlations do look more nonlinear in nature like with CO and NO2. We would like to double check now that this dataset is not stationary. What that means is that we are interested in finding out whether or not the data follows seasonal or cyclical trends. We are checking a lag time of 24 or 24 hours in this case. The data is tested using a Ljung-Box Q Test which checks to see if the time series has a non zero autocorrelation at each lag point.  
+We look at the pairwise plot fo the average measurements. It looks like in general that everything is positively correlated although some pairwise correlations do look more nonlinear in nature like with CO and NO2. 
+
+```{r}
+corrplot.mixed(measurement_summary_wide %>% ungroup %>% dplyr::select(-`Measurement date`) %>% as.matrix %>% cor)
+```
+
+As can be seen in the aggregated correlation plot above, it looks like PM10, PM2.5, and CO are highly correlated with each other. With NO2, O3, and SO2, we can see that they are correlated together. There is a good chance of multicollinearity with this dataset especially as these models autoregress upon itself.
+
+As seen in the plots above, the scale of the dataset distribution is not balanced especially evident by the PM values compared to the others. Log 10 transformation of the PM columns 
+
+```{r}
+measurement_summary_wide_log <- measurement_summary_wide %>% ungroup %>% dplyr::select(-`Measurement date`) %>% mutate(PM2.5 = log10(PM2.5), PM10 = log10(PM10))
+corrplot.mixed(measurement_summary_wide_log %>% as.matrix %>% cor)
+```
+
+With this log 10 transformation, we find that the correlation between the variables is even higher than before. Due to risk from even higher colinear effects, the untransformed data will be used. 
+
+
+We would like to double check now that this dataset is not stationary. What that means is that we are interested in finding out whether or not the data follows seasonal or cyclical trends. We are checking a lag time of 24 or 24 hours in this case. The data is tested using a Ljung-Box Q Test which checks to see if the time series has a non zero autocorrelation at each lag point.  
 
 ```{r}
 for(i in c("CO", "NO2", "O3", "PM10", "PM2.5", "SO2")){
@@ -162,7 +196,15 @@ Now that we understand the data, we would like to see what the forecasted values
 measurement_summary_ts <- ts(measurement_summary_wide %>% ungroup %>% dplyr::select(-`Measurement date`), start = c(2017, 1, 1), end = c(2019, 12, 31), frequency = 12)
 ```
 
-We then run the Vector Autoregression model with a lag of 1 month.  
+In order to optimze for the best lag time, we run a grid search to find the optimal time lag.
+
+```{r}
+VARselect(measurement_summary_ts, type = "none", lag.max = 5)
+```
+According to the criteria, we find that the optimal lag period is 1 month in this case. 
+
+
+We then run the Vector Autoregression model with a lag of 1 month. 
 
 ```{r}
 # Get the estimated coefficients
@@ -170,41 +212,77 @@ VAR_est <- VAR(measurement_summary_ts, p = 1, type = "none")
 summary(VAR_est)
 ```
 
-We get back a variety of linear models for each each predictor. We use a lag of 1 to get the difference between seasons and see some terms are significant in various predictors. For instance, PM10 has some relationship with PM2.5 which is expected. Although some of the models have good adjusted r^2, others like SO2 have very poor performance. Now, we plot the forecasted pollution values up to 10 months away from the end of 2019.  
+We get back a variety of linear models for each each predictor. We use a lag of 1 to get the difference between seasons and see some terms are significant in various predictors. For instance, PM10 has some relationship with PM2.5 which is expected. It looks like some of the models have overfitting issues as their adjusted $r^2$ is greater than 95%. SO2 and O3 have very poor performance which makes sense due to how highly correlated they are. Furthermore, their F statistic tells us that it is not useful in forecasting with all of the other variables in this case. It is also interesting to see that much of the significance in each model is due to auto regression with the exception of PM10 which is has significance relationship with many other factors. This makes sense as you would expect that larger particles would have highest association with a derived variable(PM2.5) and other chemicals on heavy pollution days. Now, we plot the forecasted pollution values up to 10 months away from the end of 2019.  
 
 ```{r}
 plot(predict(VAR_est))
 ```
 
-In the series of forecasted plots, we can see the predicted trend in blue and the 95% confidence interval in red. We can see two trends from the forecasts. PM10 and PM2.5 both are gradually increasing in each quarter since 2016 and is expected to increase again in the future. Most of the other chemicals measured will increase again in the future. For instance, NO2, O3, and SO2. The sensor seeming to malfunction can be seen in the sharp drop in the NO2 and O3 and SO3 forecast plots. We can also try quarterly to see if there are any differences.  
+In the series of forecasted plots, we can see the predicted trend in blue and the 95% confidence interval in red. We can see two trends from the forecasts. PM10 and PM2.5 both are gradually increasing in each month since 2016 and is expected to increase again in the future. It makes sense as most of the data shows it increasing and then fluctuating around 60.  Most of the other chemicals measured will increase again in the future. For instance, NO2, O3, and SO2. The sensor seeming to malfunction can be seen in the sharp drop in the NO2 and O3 and SO3 forecast plots. For some of the plots, we can see the confidence interval widening over time as it becomes more unconfident in long term predictions. We can also try quarterly to see if there are any differences.  
 
 ```{r}
-measurement_summary_quarter_ts <- ts(measurement_summary_wide %>% ungroup %>% dplyr::select(-`Measurement date`), start = c(2017, 1, 1), end = c(2019, 12, 31), frequency = 4)
-VAR_est <- VAR(measurement_summary_quarter_ts, p = 1, type = "none")
-plot(predict(VAR_est))
+measurement_summary_quarter_ts <- ts(measurement_summary_wide %>% ungroup %>% dplyr::select(-`Measurement date`), start = c(2017, 1, 1), end = c(2017, 12), frequency = 4)
+var.aic <- VARselect(measurement_summary_quarter_ts, type = "none", lag.max = 3)
+var.aic
 ```
 
-We can see changes when we switch to quarterly. PM10 and PM2.5 both continue to increase each quarter. CO, O3, and SO2 both seem to increase cyclically and is forecasted to continue to do so. NO2 interestingly decreases and then increases. 
+Doing this optimization does indeed to show that a lag of 1 is the best model using all criterions.
+
+
+```{r}
+VAR_est2 <- VAR(measurement_summary_quarter_ts, p = 1, type = "none")
+plot(predict(VAR_est2))
+```
+
+When we try doing the same thing with quartering averages, we can see major issues with this version of the model due to the statistical power of the samples due to 12 points. Because all of the trends in the 12 points are either moving up or down, the forecasted value expotentially moves in one direction or another. 
+
+The prior models have little insight into the actual relationship between variables. In order to understand more about it, we can run a error impulse reponse in which we model the response in relationship to a given variable by giving it shocks via stoichastic error. We can look using the monthly moving average and look 10 months ahead.
+
+```{r}
+for(i in c(names(measurement_summary_wide)[-1])){
+  plot(irf(VAR_est, impulse = i, n.ahead = 10, ortho = FALSE))
+}
+```
+
+There are mulitple plots above showing the effects of variation from a given variable will have on other variables over the course of 10 months. The black line shows the predicted values and the red are the 95% confidence interval. The x axis represents the number of predicted quarters and the y axis represent standard unit changes. Note that the confidence interval bands in every plot overlap 0 so it's hard to say where the true effect will actually be. 
+
+In the response to changes in CO, we can see that every chemical and gas remains constant but the particulate matter will gradually increase. For NO2, we get a similar pattern with shocks to NO2 however, particulate matter quickly increases and then gradually increase. With shocks to O3, we see almost linear increase. With shocks to PM10, we will expect both PM10 and PM2.5 to decrease exponentially until stabilizing. Inversely, shocks to PM2.5 will increase PM10 and PM2.5 expotentially until steady decrease. Finally, shocks to SO2 significantly decrease PM10 and PM2.5. 
 
 ## Discussion
 
+VAR models were chosen because all of these variables are related to one another. They are all pollutants that are commonly measured and should be considered as a whole instead of using a univariate model like ARIMA. The does not appear stationary according to the Box Ljung test which is statistically significant and tells us that this time seris data shows some cyclical or seasonal trend.
 
+We fit two different VAR models in order to forecast future pollution levels. The first model we fit used monthly moving averages. The second model we fit using the quartly moving averages. In both models, we optimize for the best time lag using a grid search using AIC. We find in that model that some of the estimated terms to have very poor fits. However, when we try doing the same thing but with quarterly data, we run into statistical under power issues due to sample size. Although this data does appear to show collinearity, the data was not normalized due to even higher correlation between variables. 
+
+Based on the forecasted data using the monthly model, we see increasing trends amongst all pollutants except for carbon monoxide. One of the limitations of the forecasting is that it does not show causation. Although there are signs of collinearity, correlation is still not causation. We can try to show some response and relationship by using the Impulse Reponse to see the effects that adding noise to a variable will have in relationship to the other variables. When we shock most of the chemicals, we see that it tended to have an increase in particle emissions. Major changes to the particle emissions themselves tended to actually have future decrease in particle emissions. 
+
+It is always important to note that these are predicted values based on prior data. Although this model could undergoing cross validation to find test and training error, it is also important to note that this 10 month prediction has potentially been impacted due to virus issues.  It would be interesting to see if any of these trends would hold given the COVID-19 effect on travel.  
 
 ## Limitations
 
-This analysis is limited only to forcasting trends in pollution metrics that were collected. This has nothing to do with causal relationships and is simply forecasting future pollution levels given prior changes. There is also potentially location based biases which would be better to explore as Seoul is separated by the Han river and the districts can highly vary from high rises to smaller older homes. Furthermore, the analysis can change completely depending on how the time series is sliced. Finally, this forecast is based on prior results. So when black swan events like pandemics happen, forecasts will be completely wrong. 
+This analysis is limited only to forcasting trends in pollution metrics that were collected. This has nothing to do with causal relationships and is simply forecasting future pollution levels given prior changes. The time periods collected also make analysis potentially very noisy as forecasting using hourly measures is possible but computationally taxing while higher levels such as quarterly or biannually is too sparse. Exploring day average and especially hourly average would be interesting models as one could expect higher pollutants when people are typically awake. There is also potentially location based biases which would be better to explore as Seoul is separated by the Han river and the districts can highly vary from high rises to smaller older homes. Although VAR is similar to a multivariate ARIMA model, it might be better to separate out the poor performing endogenous variables and forecast them using ARIMA separately. Furthermore, the analysis can change completely depending on how the time series is sliced. Finally, this forecast is based on prior results. So when black swan events like pandemics happen, forecasts will be completely wrong. 
 
 
 ## Conclusion
 
-Time series measurement 
-
+A vector auto regressing model was built in order to forecast future levels of pollution in the city of Seoul. We find that the data from the monitoring station to show non-stationary patterns and are able to use the data. Our monthly forecasting model finds that most polluants are expected to increase from January 2020 to October 2020. When we Impulse Response to see the effect of noise to the data, we find that it generally leads to an increase in particular matter. 
 
 
 ## Acknowledgements
 I would like to acknowledge Prof. Parzen and the teaching assitants of Stat 109 for teaching the course. Additionally, I would like to acknowledge bappe, Kaggle, and the Korean government for releasing this dataset.
 
-
 ## References
 16.1 Vector Autoregressions. https://www.econometrics-with-r.org/16-1-vector-autoregressions.html, May 2020
 An Introduction to Vector Autoregression (VAR). https://www.r-econometrics.com/timeseries/varintro/, May 2020
+Hu, Elise. Korea's Air is Dirty, But It's Not All Close-Neighbor China's Fault. https://www.npr.org/sections/parallels/2016/06/03/478796463/koreas-air-is-dirty-but-its-not-all-close-neighbor-chinas-fault, May 2020.
+Air Pollution in Seoul. https://www.kaggle.com/bappekim/air-pollution-in-seoul, May 2020.
+Managing Air Quality - Ambient Air Monitoring. https://www.epa.gov/air-quality-management-process/managing-air-quality-ambient-air-monitoring, May 2020.
+Huzar, Timothy. Air pollution may be a leading global cause of death. https://www.medicalnewstoday.com/articles/air-pollution-may-be-a-leading-global-cause-of-death, May 2020.
+Carbon Monoxide Posioning. https://www.health.harvard.edu/a_to_z/carbon-monoxide-poisoning-a-to-z, May 2020.
+Sulfure Dioxide(SO2). https://www.environment.gov.au/protection/publications/factsheet-sulfur-dioxide-so2, May 2020.
+Basic Information about NO2. https://www.epa.gov/no2-pollution/basic-information-about-no2, May 2020.
+What is Ozone. https://www.epa.gov/ozone-pollution-and-your-patients-health/what-ozone, May 2020.
+Particulate Matter (PM10 and PM2.5). http://www.npi.gov.au/resource/particulate-matter-pm10-and-pm25, May 2020.
+An Introduction to Impulse Reponse Analysis of VAR Models. https://www.r-econometrics.com/timeseries/irf/, May 2020.
+Floyd, John. Vector Autogression Analysis: Estimation and Interpretation, September 19 2005. 
+VAR forecasting methodology. https://stats.stackexchange.com/questions/191851/var-forecasting-methodology, May 2020.
