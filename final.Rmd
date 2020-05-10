@@ -2,7 +2,9 @@
 title: "Air Pollution in Seoul"
 author: "Daniel Chen"
 date: "4/15/2020"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -272,17 +274,17 @@ A vector auto regressing model was built in order to forecast future levels of p
 I would like to acknowledge Prof. Parzen and the teaching assitants of Stat 109 for teaching the course. Additionally, I would like to acknowledge bappe, Kaggle, and the Korean government for releasing this dataset.
 
 ## References
-16.1 Vector Autoregressions. https://www.econometrics-with-r.org/16-1-vector-autoregressions.html, May 2020
-An Introduction to Vector Autoregression (VAR). https://www.r-econometrics.com/timeseries/varintro/, May 2020
-Hu, Elise. Korea's Air is Dirty, But It's Not All Close-Neighbor China's Fault. https://www.npr.org/sections/parallels/2016/06/03/478796463/koreas-air-is-dirty-but-its-not-all-close-neighbor-chinas-fault, May 2020.
-Air Pollution in Seoul. https://www.kaggle.com/bappekim/air-pollution-in-seoul, May 2020.
-Managing Air Quality - Ambient Air Monitoring. https://www.epa.gov/air-quality-management-process/managing-air-quality-ambient-air-monitoring, May 2020.
-Huzar, Timothy. Air pollution may be a leading global cause of death. https://www.medicalnewstoday.com/articles/air-pollution-may-be-a-leading-global-cause-of-death, May 2020.
-Carbon Monoxide Posioning. https://www.health.harvard.edu/a_to_z/carbon-monoxide-poisoning-a-to-z, May 2020.
-Sulfure Dioxide(SO2). https://www.environment.gov.au/protection/publications/factsheet-sulfur-dioxide-so2, May 2020.
-Basic Information about NO2. https://www.epa.gov/no2-pollution/basic-information-about-no2, May 2020.
-What is Ozone. https://www.epa.gov/ozone-pollution-and-your-patients-health/what-ozone, May 2020.
-Particulate Matter (PM10 and PM2.5). http://www.npi.gov.au/resource/particulate-matter-pm10-and-pm25, May 2020.
-An Introduction to Impulse Reponse Analysis of VAR Models. https://www.r-econometrics.com/timeseries/irf/, May 2020.
-Floyd, John. Vector Autogression Analysis: Estimation and Interpretation, September 19 2005. 
-VAR forecasting methodology. https://stats.stackexchange.com/questions/191851/var-forecasting-methodology, May 2020.
+16.1 Vector Autoregressions. https://www.econometrics-with-r.org/16-1-vector-autoregressions.html, May 2020  
+An Introduction to Vector Autoregression (VAR). https://www.r-econometrics.com/timeseries/varintro/, May 2020  
+Hu, Elise. Korea's Air is Dirty, But It's Not All Close-Neighbor China's Fault. https://www.npr.org/sections/parallels/2016/06/03/478796463/koreas-air-is-dirty-but-its-not-all-close-neighbor-chinas-fault, May 2020.  
+Air Pollution in Seoul. https://www.kaggle.com/bappekim/air-pollution-in-seoul, May 2020.  
+Managing Air Quality - Ambient Air Monitoring. https://www.epa.gov/air-quality-management-process/managing-air-quality-ambient-air-monitoring, May 2020.  
+Huzar, Timothy. Air pollution may be a leading global cause of death. https://www.medicalnewstoday.com/articles/air-pollution-may-be-a-leading-global-cause-of-death, May 2020.  
+Carbon Monoxide Posioning. https://www.health.harvard.edu/a_to_z/carbon-monoxide-poisoning-a-to-z, May 2020.  
+Sulfure Dioxide(SO2). https://www.environment.gov.au/protection/publications/factsheet-sulfur-dioxide-so2, May 2020.  
+Basic Information about NO2. https://www.epa.gov/no2-pollution/basic-information-about-no2, May 2020.  
+What is Ozone. https://www.epa.gov/ozone-pollution-and-your-patients-health/what-ozone, May 2020.  
+Particulate Matter (PM10 and PM2.5). http://www.npi.gov.au/resource/particulate-matter-pm10-and-pm25, May 2020.  
+An Introduction to Impulse Reponse Analysis of VAR Models. https://www.r-econometrics.com/timeseries/irf/, May 2020.  
+Floyd, John. Vector Autogression Analysis: Estimation and Interpretation, September 19 2005.  
+VAR forecasting methodology. https://stats.stackexchange.com/questions/191851/var-forecasting-methodology, May 2020.  
